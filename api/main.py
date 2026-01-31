@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from database.database import engine, get_db
 from models.car import Car
@@ -50,3 +50,34 @@ def create_car(car_data: CarCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_car)
     return {"message": "Car created successfully", "car": new_car}
+
+@app.get("/api/cars/{car_id}")
+def get_car(car_id: int, db: Session = Depends(get_db)):
+    car = db.query(Car).filter(Car.id == car_id).first()
+    if not car:
+        raise HTTPException(status_code= 404, detail="This car not found in the database")
+    return car
+
+@app.put("/api/cars/{car_id}")
+def update_car(car_id: int, car_data: CarCreate, db: Session = Depends(get_db)):        
+    car = db.query(Car).filter(Car.id == car_id).first()
+    if not car:
+        raise HTTPException(status_code=404, detail="Car not found in the database")
+    
+    car.name = car_data.name
+    car.production_start = car_data.production_start
+    car.production_end = car_data.production_end
+    car.models = car_data.models
+
+    db.commit()
+    db.refresh(car)
+    return {"message": "Car updated successfully", "Car": car}
+
+@app.delete("/api/cars/{car_id}")
+def delete_car(car_id: int, db: Session = Depends(get_db)):
+    car = db.query(Car).filter(Car.id == car_id).first()
+    if not car: 
+        raise HTTPException(status_code=404, detail="This car was not found in the database")
+    db.delete(car)
+    db.commit()
+    return {"message": "Car deleted successfully"}             
