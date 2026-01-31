@@ -8,3 +8,4 @@ class Car(Base):
     production_start = Column(String)
     production_end = Column(String)
     models = Column(JSON)
+    image_url = Column(String, nullable=True)

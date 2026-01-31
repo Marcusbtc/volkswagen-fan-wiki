@@ -14,13 +14,15 @@ app = FastAPI(
 from database.database import Base
 Base.metadata.create_all(bind=engine)
 
+from typing import Optional
+
 class CarCreate(BaseModel):
     name: str
     production_start: str
     production_end: str
     models: list
+    image_url: Optional[str] = None
 
-# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "https://volkswagen-fan-wiki.com"],
@@ -44,7 +46,8 @@ def create_car(car_data: CarCreate, db: Session = Depends(get_db)):
         name=car_data.name,
         production_start=car_data.production_start,
         production_end=car_data.production_end,
-        models=car_data.models
+        models=car_data.models,
+        image_url=car_data.image_url
     )
     db.add(new_car)
     db.commit()
@@ -68,6 +71,7 @@ def update_car(car_id: int, car_data: CarCreate, db: Session = Depends(get_db)):
     car.production_start = car_data.production_start
     car.production_end = car_data.production_end
     car.models = car_data.models
+    car.image_url = car_data.image_url
 
     db.commit()
     db.refresh(car)
