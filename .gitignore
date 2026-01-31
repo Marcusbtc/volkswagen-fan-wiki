@@ -49,3 +49,5 @@ Thumbs.db
 # Secrets and credentials
 secrets.toml
 .streamlit/secrets.toml
+my-notes/
+CLAUDE.md
