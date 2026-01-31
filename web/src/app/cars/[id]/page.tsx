@@ -4,70 +4,91 @@ import { useState, useEffect, use } from 'react'
 import { getCar, updateCar } from '@/lib/api'
 import Link from 'next/link'
 import { useToast } from '@/components/Toast'
+import { ImageUpload } from '@/components/ImageUpload'
+import { SkeletonText } from '@/components/Skeleton'
+import { Car } from '@/types/car'
 
-interface Car {
-  id: number
+interface CarFormData {
   name: string
-  production_start: string | null
-  production_end: string | null
-  models: any[]
-  image_url: string | null
+  production_start: string
+  production_end: string
+  image_url: string
+  tags: string
 }
 
-export default function Carpage({ params }: { params: Promise<{ id: string }> }) {
+function carToFormData(car: Car): CarFormData {
+  return {
+    name: car.name,
+    production_start: car.production_start || '',
+    production_end: car.production_end || '',
+    image_url: car.image_url || '',
+    tags: car.tags?.join(', ') || ''
+  }
+}
+
+function formDataToUpdate(formData: CarFormData, originalCar: Car) {
+  return {
+    id: originalCar.id,
+    name: formData.name,
+    production_start: formData.production_start,
+    production_end: formData.production_end,
+    models: originalCar.models || [],
+    image_url: formData.image_url || null,
+    tags: formData.tags.split(',').map(t => t.trim()).filter(t => t)
+  }
+}
+
+export default function CarPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const [car, setCar] = useState<Car | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CarFormData>({
     name: '',
     production_start: '',
-    production_end: ''
+    production_end: '',
+    image_url: '',
+    tags: ''
   })
   const { showToast } = useToast()
 
   useEffect(() => {
-    const loadCar = async () => {
+    async function loadCar() {
       const data = await getCar(parseInt(id))
       setCar(data)
-      setFormData({
-        name: data.name,
-        production_start: data.production_start || '',
-        production_end: data.production_end || ''
-      })
+      setFormData(carToFormData(data))
       setIsLoading(false)
     }
     loadCar()
   }, [id])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  function updateField(field: keyof CarFormData, value: string) {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!car) return
     
     try {
-      await updateCar(car.id, {
-        id: car.id,
-        name: formData.name,
-        production_start: formData.production_start,
-        production_end: formData.production_end,
-        models: car.models,
-        image_url: car.image_url
-      })
-      setCar({
-        ...car,
-        name: formData.name,
-        production_start: formData.production_start,
-        production_end: formData.production_end
-      })
+      const updateData = formDataToUpdate(formData, car)
+      await updateCar(car.id, updateData)
+      setCar({ ...car, ...updateData })
       setIsEditing(false)
       showToast('Car updated successfully', 'success')
-    } catch (error) {
+    } catch {
       showToast('Failed to update car', 'error')
     }
   }
 
   if (isLoading || !car) {
-    return <div className="text-white">Loading...</div>
+    return (
+      <div className="max-w-7xl mx-auto px-6 pt-24 pb-8">
+        <div className="glass-card p-8">
+          <SkeletonText lines={5} />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -90,7 +111,7 @@ export default function Carpage({ params }: { params: Promise<{ id: string }> })
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) => updateField('name', e.target.value)}
                   className="w-full px-4 py-3 rounded-xl backdrop-blur-md bg-white/10 border border-white/30 text-white placeholder-white/50 focus:border-[#00B0F0] focus:ring-2 focus:ring-[#00B0F0]/30 outline-none transition-all"
                   placeholder="Car name"
                   required
@@ -99,16 +120,41 @@ export default function Carpage({ params }: { params: Promise<{ id: string }> })
                   <input
                     type="text"
                     value={formData.production_start}
-                    onChange={(e) => setFormData({...formData, production_start: e.target.value})}
+                    onChange={(e) => updateField('production_start', e.target.value)}
                     className="px-4 py-3 rounded-xl backdrop-blur-md bg-white/10 border border-white/30 text-white placeholder-white/50 focus:border-[#00B0F0] focus:ring-2 focus:ring-[#00B0F0]/30 outline-none transition-all"
                     placeholder="Start year"
                   />
                   <input
                     type="text"
                     value={formData.production_end}
-                    onChange={(e) => setFormData({...formData, production_end: e.target.value})}
+                    onChange={(e) => updateField('production_end', e.target.value)}
                     className="px-4 py-3 rounded-xl backdrop-blur-md bg-white/10 border border-white/30 text-white placeholder-white/50 focus:border-[#00B0F0] focus:ring-2 focus:ring-[#00B0F0]/30 outline-none transition-all"
                     placeholder="End year"
+                  />
+                </div>
+                <input
+                  type="text"
+                  value={formData.tags}
+                  onChange={(e) => updateField('tags', e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl backdrop-blur-md bg-white/10 border border-white/30 text-white placeholder-white/50 focus:border-[#00B0F0] focus:ring-2 focus:ring-[#00B0F0]/30 outline-none transition-all"
+                  placeholder="Tags (comma separated)"
+                />
+                <div className="space-y-3">
+                  <div className="text-white/60 text-sm">Image URL (paste link)</div>
+                  <input
+                    type="url"
+                    value={formData.image_url}
+                    onChange={(e) => updateField('image_url', e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl backdrop-blur-md bg-white/10 border border-white/30 text-white placeholder-white/50 focus:border-[#00B0F0] focus:ring-2 focus:ring-[#00B0F0]/30 outline-none transition-all"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {formData.image_url && (
+                    <img src={formData.image_url} alt="Preview" className="w-full max-w-md h-48 object-cover rounded-lg" />
+                  )}
+                  <div className="text-white/40 text-xs">Or upload from your device:</div>
+                  <ImageUpload 
+                    onUpload={(url) => updateField('image_url', url)}
+                    currentUrl=""
                   />
                 </div>
               </div>
@@ -143,14 +189,65 @@ export default function Carpage({ params }: { params: Promise<{ id: string }> })
                 </button>
               </div>
               
-              <div className="flex flex-wrap gap-4 mb-8">
-                <div className="px-6 py-3 rounded-2xl backdrop-blur-md bg-white/10 border border-white/30">
-                  <p className="text-white/60 text-sm mb-1">Production Period</p>
+              {car.image_url && (
+                <div className="mb-6">
+                  <img 
+                    src={car.image_url} 
+                    alt={car.name}
+                    className="w-full max-w-md h-64 object-cover rounded-2xl"
+                  />
+                </div>
+              )}
+              
+              {car.description && (
+                <p className="text-white/80 text-lg mb-6 leading-relaxed">{car.description}</p>
+              )}
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div className="px-5 py-4 rounded-2xl backdrop-blur-md bg-white/10 border border-white/30">
+                  <p className="text-white/60 text-xs mb-1">Production</p>
                   <p className="text-white font-semibold">
-                    {car.production_start || 'Unknown'} → {car.production_end || 'Present'}
+                    {car.production_start || '?'} - {car.production_end || 'Present'}
                   </p>
                 </div>
+                {car.category && (
+                  <div className="px-5 py-4 rounded-2xl backdrop-blur-md bg-white/10 border border-white/30">
+                    <p className="text-white/60 text-xs mb-1">Category</p>
+                    <p className="text-white font-semibold">{car.category}</p>
+                  </div>
+                )}
+                {car.engine && (
+                  <div className="px-5 py-4 rounded-2xl backdrop-blur-md bg-white/10 border border-white/30">
+                    <p className="text-white/60 text-xs mb-1">Engine</p>
+                    <p className="text-white font-semibold">{car.engine}</p>
+                  </div>
+                )}
+                {car.fuel_type && (
+                  <div className="px-5 py-4 rounded-2xl backdrop-blur-md bg-white/10 border border-white/30">
+                    <p className="text-white/60 text-xs mb-1">Fuel Type</p>
+                    <p className="text-white font-semibold">{car.fuel_type}</p>
+                  </div>
+                )}
+                {car.country && (
+                  <div className="px-5 py-4 rounded-2xl backdrop-blur-md bg-white/10 border border-white/30">
+                    <p className="text-white/60 text-xs mb-1">Market</p>
+                    <p className="text-white font-semibold">{car.country}</p>
+                  </div>
+                )}
               </div>
+              
+              {car.tags && car.tags.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-white mb-4">Tags</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {car.tags.map((tag, index) => (
+                      <span key={index} className="px-4 py-2 rounded-xl backdrop-blur-md bg-[#00B0F0]/20 border border-[#00B0F0]/50 text-[#00B0F0] text-sm">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               {car.models && car.models.length > 0 && (
                 <div>

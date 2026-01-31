@@ -1,222 +1,266 @@
-# Volkswagen Fan Wiki 🚗
+# Volkswagen Fan Wiki
 
-A comprehensive wiki dedicated to Volkswagen cars, starting with the iconic Golf series. This full-stack web application showcases detailed information about VW models including production dates, technical specifications, engine details, and unique characteristics.
+A comprehensive wiki dedicated to Volkswagen cars. This modern full-stack web application showcases detailed information about VW models including production dates, images, tags, and specifications.
 
-## 🎯 Project Overview
+![Next.js](https://img.shields.io/badge/Next.js-16.1.6-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19.2.3-61DAFB?logo=react)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688?logo=fastapi)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss)
 
-A modern full-stack web application featuring:
+## Features
 
-- **Backend API**: Python + FastAPI - RESTful API for car data management
-- **Frontend**: Next.js - Server-side rendered dynamic wiki pages
-- **Database**: PostgreSQL 15 - Relational database with JSON support
-- **Documentation**: Automatic API docs via Swagger UI
+- **Full CRUD API** - Create, Read, Update, Delete cars
+- **Modern Frontend** - Next.js 16 with App Router and React 19
+- **Search & Filter** - Real-time search with sorting options
+- **Pagination** - Smart pagination with ellipsis
+- **Image Upload** - Drag-and-drop with preview
+- **Tags System** - Categorize cars with tags
+- **Favorites** - Persist favorites in localStorage
+- **Toast Notifications** - User feedback system
+- **Error Handling** - Retry logic + Error Boundaries
+- **Liquid Glass UI** - Modern glassmorphism design
+- **Type Safety** - TypeScript + Zod validation
+- **Unit Tests** - Vitest for utility functions
+- **API Docs** - Automatic Swagger UI at `/docs`
+- **CSV Import** - Bulk import cars from CSV files
 
-## ✨ Features
+## Screenshots
 
-### Current (v0.1.0)
-- ✅ RESTful API with GET and POST endpoints
-- ✅ PostgreSQL database with Car model
-- ✅ Automatic API documentation at `/docs`
-- ✅ CORS enabled for frontend communication
-- ✅ Data validation with Pydantic schemas
-- ✅ JSON support for complex car specifications
+### Main Page
+![Main Page - Volkswagen Collection](info/images/Screenshot%202026-01-31%20at%2017.52.45.png)
 
-### Planned
-- 🔄 Next.js frontend with Tailwind CSS
-- 🔄 Car listing and detail pages
-- 🔄 Search and filter functionality
-- 🔄 Update and delete operations
-- 🔄 Image gallery for each model
-- 🔄 Custom VW-themed styling and animations
+### Car Detail View
+![Car Detail with Specifications](info/images/Screenshot%202026-01-31%20at%2017.55.34.png)
 
-## 📁 Project Structure
+### Add New Car
+![Add Car Form](info/images/Screenshot%202026-01-31%20at%2017.55.53.png)
+
+## Tech Stack
+
+### Backend
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Python | 3.9+ | Programming language |
+| FastAPI | 0.104.1 | Async web framework |
+| SQLAlchemy | 2.0.23 | ORM |
+| Pydantic | 2.5.2 | Data validation |
+| PostgreSQL | 15 | Database |
+| Uvicorn | 0.24.0 | ASGI server |
+
+### Frontend
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Next.js | 16.1.6 | React framework (App Router) |
+| React | 19.2.3 | UI library |
+| TypeScript | 5 | Type safety |
+| Tailwind CSS | 4 | Styling |
+| Zod | 4.3.6 | Runtime validation |
+| Axios | 1.13.4 | HTTP client |
+| Vitest | 4.0.18 | Testing |
+
+## Project Structure
 
 ```
 volkswagen-fan-wiki/
-├── api/                    # Backend (Python + FastAPI)
-│   ├── database/          # Database configuration
-│   │   └── database.py    # SQLAlchemy setup
-│   ├── models/            # Database models
-│   │   ├── car.py        # Car model definition
-│   │   └── __init__.py
-│   ├── main.py           # FastAPI application
-│   ├── requirements.txt  # Python dependencies
-│   └── venv/            # Virtual environment (not in Git)
-├── web/                  # Frontend (Next.js - coming soon)
-├── CHANGELOG.md         # Version history
-├── README.md            # This file
-└── .gitignore          # Git ignore rules
+├── api/                          # Backend (Python/FastAPI)
+│   ├── main.py                   # FastAPI app + endpoints
+│   ├── config.py                 # Configuration
+│   ├── database/
+│   │   └── database.py           # SQLAlchemy setup
+│   ├── models/
+│   │   └── car.py                # Car ORM model
+│   ├── schemas/
+│   │   └── car.py                # Pydantic schemas
+│   ├── migrate.py                # DB migration (image_url)
+│   ├── migrate_tags.py           # DB migration (tags)
+│   ├── uploads/                  # Uploaded images
+│   └── requirements.txt
+│
+├── web/                          # Frontend (Next.js)
+│   ├── src/
+│   │   ├── app/                  # App Router pages
+│   │   │   ├── layout.tsx        # Root layout
+│   │   │   ├── page.tsx          # Home (car list)
+│   │   │   └── cars/[id]/page.tsx # Car detail
+│   │   ├── components/           # React components
+│   │   │   ├── SearchableCarList.tsx
+│   │   │   ├── CarCard.tsx
+│   │   │   ├── AddCarForm.tsx
+│   │   │   ├── ImageUpload.tsx
+│   │   │   ├── Toast.tsx
+│   │   │   ├── Skeleton.tsx
+│   │   │   ├── ErrorBoundary.tsx
+│   │   │   └── Footer.tsx
+│   │   ├── context/
+│   │   │   └── FavoritesContext.tsx
+│   │   ├── hooks/
+│   │   │   └── useCars.ts
+│   │   ├── lib/
+│   │   │   ├── api.ts            # API client + retry
+│   │   │   ├── config.ts         # Environment config
+│   │   │   ├── carUtils.ts       # Sort/filter/paginate
+│   │   │   └── carUtils.test.ts  # Unit tests
+│   │   └── types/
+│   │       ├── car.ts            # TypeScript interfaces
+│   │       └── schemas.ts        # Zod schemas
+│   └── package.json
+│
+├── ARCHITECTURE.md               # System architecture docs
+├── CHANGELOG.md                  # Version history
+└── README.md                     # This file
 ```
 
-## 🛠 Tech Stack
-
-### Backend
-- **Python 3.9+** - Programming language
-- **FastAPI** - Modern, fast web framework
-- **Uvicorn** - ASGI server
-- **SQLAlchemy** - SQL toolkit and ORM
-- **PostgreSQL 15** - Relational database
-- **Pydantic** - Data validation
-- **psycopg2-binary** - PostgreSQL adapter
-
-### Frontend (Coming Soon)
-- **Next.js** - React framework
-- **React** - UI library
-- **Tailwind CSS** - Utility-first CSS
-- **TypeScript** - Type-safe JavaScript
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
-- Python 3.9 or higher
+- Python 3.9+
+- Node.js 18+
 - PostgreSQL 15
 - Git
 
-### Backend Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Marcusbtc/volkswagen-fan-wiki.git
-   cd volkswagen-fan-wiki
-   ```
-
-2. **Set up PostgreSQL**
-   ```bash
-   # Install PostgreSQL (macOS)
-   brew install postgresql@15
-
-   # Start PostgreSQL
-   brew services start postgresql@15
-
-   # Create database
-   createdb volkswagen_wiki
-   ```
-
-3. **Set up Python virtual environment**
-   ```bash
-   cd api
-   python3 -m venv venv
-   source venv/bin/activate  # On macOS/Linux
-   ```
-
-4. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. **Run the development server**
-   ```bash
-   uvicorn main:app --reload
-   ```
-
-6. **Access the API**
-   - API: http://127.0.0.1:8000
-   - Interactive docs: http://127.0.0.1:8000/docs
-   - Alternative docs: http://127.0.0.1:8000/redoc
-
-### Frontend Setup (Coming Soon)
-Instructions will be added when Next.js frontend is implemented.
-
-## 📡 API Endpoints
-
-### Current Endpoints
-
-| Method | Endpoint      | Description                |
-|--------|---------------|----------------------------|
-| GET    | `/`           | Welcome message            |
-| GET    | `/api/cars`   | Get all cars               |
-| POST   | `/api/cars`   | Create a new car           |
-
-### Example Usage
-
-**Get all cars:**
+### 1. Clone Repository
 ```bash
-curl http://127.0.0.1:8000/api/cars
+git clone https://github.com/Marcusbtc/volkswagen-fan-wiki.git
+cd volkswagen-fan-wiki
 ```
 
-**Create a new car:**
+### 2. Backend Setup
+```bash
+# Create database
+createdb volkswagen_wiki
+
+# Setup Python environment
+cd api
+python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run migrations (if needed)
+python migrate.py
+python migrate_tags.py
+
+# Start server
+uvicorn main:app --reload
+```
+
+**Backend runs at:** http://127.0.0.1:8000
+
+### 3. Frontend Setup
+```bash
+cd web
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+**Frontend runs at:** http://localhost:3000
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Welcome message |
+| GET | `/api/cars` | List all cars |
+| POST | `/api/cars` | Create car |
+| GET | `/api/cars/{id}` | Get car by ID |
+| PUT | `/api/cars/{id}` | Update car |
+| DELETE | `/api/cars/{id}` | Delete car |
+| POST | `/api/upload` | Upload image |
+| GET | `/uploads/{file}` | Serve image |
+
+### Example: Create Car
 ```bash
 curl -X POST http://127.0.0.1:8000/api/cars \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Volkswagen Golf",
-    "production_start": "1974",
+    "name": "Volkswagen Golf GTI",
+    "production_start": "1976",
     "production_end": "2024",
-    "models": [
-      {
-        "version": "GTI",
-        "engine": "1.6L",
-        "power": "200hp",
-        "torque": "250Nm",
-        "top_speed": "250km/h",
-        "acceleration": "5.5s",
-        "colors": ["blue", "red", "black", "white"]
-      }
-    ]
+    "models": ["Mk1", "Mk2", "Mk8"],
+    "image_url": "/uploads/golf-gti.jpg",
+    "tags": ["hot-hatch", "iconic", "performance"]
   }'
 ```
 
-## 🗄 Database Schema
+## Database Schema
 
 ### Cars Table
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER | Primary key (auto) |
+| name | VARCHAR | Car model name (indexed) |
+| production_start | VARCHAR | Start year |
+| production_end | VARCHAR | End year |
+| models | JSON | Model variants array |
+| image_url | VARCHAR | Image path (nullable) |
+| tags | JSON | Tags array (default: []) |
 
-| Column             | Type    | Description                      |
-|--------------------|---------|----------------------------------|
-| id                 | INTEGER | Primary key (auto-increment)     |
-| name               | VARCHAR | Car model name                   |
-| production_start   | VARCHAR | Production start year            |
-| production_end     | VARCHAR | Production end year              |
-| models             | JSON    | Array of model variants & specs  |
+## Testing
 
-## 🚗 Models Covered
+```bash
+cd web
+npm test
+```
 
-- **Volkswagen Golf** (all generations: Mk1 - Mk8)
-  - GTI variants
-  - R variants
-  - Standard models
+Tests cover:
+- `sortCars()` - Sorting by name, year asc/desc
+- `filterCarsByQuery()` - Search filtering
+- `getPageNumbers()` - Pagination logic
+- `paginate()` - Array slicing
 
-_More models will be added soon!_
+## Design System
 
-## 📚 Documentation
+The UI uses a **liquid glass** (glassmorphism) design with VW brand colors:
+- **Primary Blue**: `#00B0F0`
+- **Dark Blue**: `#001E50`
+- **Glass Effect**: `backdrop-blur-xl` + `bg-white/10`
 
-- API Documentation: Available at `/docs` when server is running
-- [CHANGELOG.md](CHANGELOG.md) - Version history and updates
-- Study notes: Private documentation for learning purposes (not in Git)
+## Documentation
 
-## 🤝 Contributing
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture, data flow, design patterns
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and milestones
+- **API Docs**: http://127.0.0.1:8000/docs (Swagger UI)
+- **API Docs**: http://127.0.0.1:8000/redoc (ReDoc)
 
-This is a personal learning project, but suggestions and feedback are welcome!
+## Project Status
 
-## 📝 License
+**Current Version:** 0.2.0  
+**Status:** MVP Complete
 
-This project is open source and available for educational purposes.
+### Completed
+- [x] Backend API (full CRUD)
+- [x] PostgreSQL database
+- [x] Next.js frontend
+- [x] Search, sort, pagination
+- [x] Image upload
+- [x] Tags system
+- [x] Favorites
+- [x] Unit tests
+- [x] Documentation
 
-## 👤 Author
+### Planned
+- [ ] User authentication (JWT)
+- [ ] Production deployment
+- [ ] Redis caching
+- [ ] Error monitoring (Sentry)
+
+## Author
 
 **Marcus Barbosa**
 - GitHub: [@Marcusbtc](https://github.com/Marcusbtc)
-- Learning: Full-stack development with Python and Next.js
+- Website: [marcusbtc.com.br](https://marcusbtc.com.br)
 
-## 📊 Project Status
+## License
 
-**Current Version:** 0.1.0
-**Status:** 🚧 Active Development
-
-### Milestones
-- [x] Backend API setup
-- [x] Database configuration
-- [x] Basic CRUD endpoints
-- [ ] Frontend setup
-- [ ] Full CRUD operations
-- [ ] Search & filter
-- [ ] Production deployment
-
-## 🙏 Acknowledgments
-
-- FastAPI for the amazing framework and documentation
-- PostgreSQL for the robust database system
-- The Volkswagen community for inspiration
+This project is open source and available under the MIT License.
 
 ---
 
-**Built with ❤️ and a passion for Volkswagen cars**
+**Built with passion for Volkswagen cars**
